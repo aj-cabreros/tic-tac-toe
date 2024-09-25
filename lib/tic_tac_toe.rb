@@ -17,13 +17,13 @@ class TicTacToe
   end
 
   def won?
-    temp = @entries.take(3)
+    temp = @entries[0..2]
     return true if temp.all? { |tile| tile == 'X' } || temp.all? { |tile| tile == 'O' }
 
     temp = @entries[3..5]
     return true if temp.all? { |tile| tile == 'X' } || temp.all? { |tile| tile == 'O' }
 
-    temp = @entries.drop(6)
+    temp = @entries[6..8]
     return true if temp.all? { |tile| tile == 'X' } || temp.all? { |tile| tile == 'O' }
 
     temp = @entries.values_at(0, 3, 6)
@@ -50,15 +50,23 @@ class TicTacToe
     puts @board
   end
 
+  def exit_early?
+    true if @choice == 'q'
+  end
+
   def gets_player_choice
     puts "Enter a tile: e.g 'a1', 'c3'"
     @choice = gets
     @choice = @choice.chomp
+    return if exit_early?
+
     @choice = gets until choice_valid?
     @choice
   end
 
   def update_board(choice, player)
+    return if exit_early?
+
     if player == 'crosses'
       @entries[convert_choice(choice)] = 'X'
     elsif player == 'noughts'
@@ -75,14 +83,15 @@ class TicTacToe
   end
 
   def choice_valid?
-    until %w[a1 a2 a3 b1 b2 b3 c1 c2 c3].include?(@choice)
-      p 'invalid tile'
-      p "input letter then number e.g 'a1', 'c3'"
+    valid_options = %w[a1 a2 a3 b1 b2 b3 c1 c2 c3]
+    until exit_early? || (valid_options.include?(@choice) && @entries[convert_choice(@choice)] == '*')
+      puts 'Input is not on board or already taken'
+      puts "Enter letter then number e.g 'a1', 'c3'"
       @choice = gets
       @choice = @choice.chomp
     end
 
-    until @entries[convert_choice(@choice)] == '*'
+    until exit_early? || @entries[convert_choice(@choice)] == '*'
       puts 'tile already occupied'
       @choice = gets
       @choice = @choice.chomp
@@ -112,6 +121,7 @@ class TicTacToe
       8
     else
       p 'choice not recognized'
+      9
     end
   end
 end
